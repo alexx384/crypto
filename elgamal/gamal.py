@@ -1,5 +1,5 @@
-import ctypes
 import sympy
+import random
 
 
 class ElGamal(object):
@@ -8,7 +8,31 @@ class ElGamal(object):
             self.p = sympy.randprime(pow(2, dimension), pow(2, dimension + 1))
         else:
             self.p = p
-        generate(p)
+
+        if g is None:
+            self.g = generate(self.p)
+        else:
+            self.g = g
+
+        self.x = random.randint(2, (self.p - 1))
+
+    def _func_encrypt(self, msg: int, shared_key: int):
+        return pow(msg - shared_key, 1, self.p)
+
+    def _reversed_func_encrypt(self, c: int, shared_key: int):
+        return pow(c + shared_key, 1, self.p)
+
+    def get_shared_key(self):
+        return pow(self.g, self.x, self.p)
+
+    # msg must be lower than self.p
+    def encrypt_msg(self, shared_key: int, msg: int):
+        common_shared_key = pow(shared_key, self.x, self.p)
+        return self._func_encrypt(msg=msg, shared_key=common_shared_key)
+
+    def decrypt_msg(self, shared_key: int, c: int):
+        common_shared_key = pow(shared_key, self.x, self.p)
+        return self._reversed_func_encrypt(c=c, shared_key=common_shared_key)
 
 
 # Algorithm from:
@@ -62,10 +86,20 @@ def generate(prime: int) -> int:
 
 
 def main():
-    libgenerator = ctypes.CDLL('./libgenerator.so')
-    print(libgenerator.generator(23))
+    alice = ElGamal(128)
+    alice_encr = alice.get_shared_key()
 
-    print(generate(23))
+    bob = ElGamal(128, alice.p, alice.g)
+    bob_encr = bob.get_shared_key()
+
+    print(alice.p)
+    print(alice.g)
+
+    # Does not work
+    alice_ciph = alice.encrypt_msg(bob_encr, 11)
+    print(alice_ciph)
+    alice_msg = bob.decrypt_msg(alice_encr, alice_ciph)
+    print(alice_msg)
 
 
 main()
