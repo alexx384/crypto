@@ -14,6 +14,9 @@ class ElGamal(object):
         else:
             self.g = g
 
+        if self.g >= self.p:
+            raise Exception("")
+
         self.x = random.randint(2, (self.p - 1))
 
     def _func_encrypt(self, msg: int, shared_key: int):
@@ -27,6 +30,9 @@ class ElGamal(object):
 
     # msg must be lower than self.p
     def encrypt_msg(self, shared_key: int, msg: int):
+        if msg >= self.p:
+            return None
+
         common_shared_key = pow(shared_key, self.x, self.p)
         return self._func_encrypt(msg=msg, shared_key=common_shared_key)
 
@@ -86,20 +92,21 @@ def generate(prime: int) -> int:
 
 
 def main():
-    alice = ElGamal(128)
+    alice = ElGamal(768)
     alice_encr = alice.get_shared_key()
 
-    bob = ElGamal(128, alice.p, alice.g)
+    bob = ElGamal(768, alice.p, alice.g)
     bob_encr = bob.get_shared_key()
 
     print(alice.p)
     print(alice.g)
 
     # Does not work
-    alice_ciph = alice.encrypt_msg(bob_encr, 11)
+    msg = int.from_bytes(b"Hello World", byteorder='big')
+    alice_ciph = alice.encrypt_msg(bob_encr, msg)
     print(alice_ciph)
     alice_msg = bob.decrypt_msg(alice_encr, alice_ciph)
-    print(alice_msg)
+    print(alice_msg.to_bytes(11, byteorder='big'))
 
 
 main()
