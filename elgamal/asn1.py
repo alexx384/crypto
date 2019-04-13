@@ -17,7 +17,7 @@ class _Payload(univ.Sequence):
 
 class _Ciphertext(univ.Sequence):
     componentType = namedtype.NamedTypes(
-        namedtype.NamedType("a_k", univ.Integer()),
+        namedtype.NamedType("a_y", univ.Integer()),
         namedtype.NamedType("c", univ.Integer())
     )
 
@@ -31,7 +31,7 @@ class _Parameters(univ.Sequence):
 
 class _PublicKey(univ.Sequence):
     componentType = namedtype.NamedTypes(
-        namedtype.NamedType("y", univ.Integer())
+        namedtype.NamedType("a_x", univ.Integer())
     )
 
 
@@ -61,15 +61,15 @@ class _Header(univ.Sequence):
 """ Main functions """
 
 
-def encode(a_k: int, c: int, p: int, g: int, y: int, encrypted_msg: bytes,
+def encode(a_y: int, c: int, p: int, g: int, a_x: int, encrypted_msg: bytes,
            msg_len: int = 0) -> bytes:
     private = _Header()
     private["keys"]["first_key"]["algorithm_id"] = b"\x80\x01\x02\x03"
     private["keys"]["first_key"]["str_key_id"] = "test"
-    private["keys"]["first_key"]["public_key"]["y"] = y
+    private["keys"]["first_key"]["public_key"]["a_x"] = a_x
     private["keys"]["first_key"]["parameters"]["prime"] = p
     private["keys"]["first_key"]["parameters"]["generator"] = g
-    private["keys"]["first_key"]["ciphertext"]["a_k"] = a_k
+    private["keys"]["first_key"]["ciphertext"]["a_y"] = a_y
     private["keys"]["first_key"]["ciphertext"]["c"] = c
     private["payload"]["payload_id"] = 0x0132.to_bytes(2, byteorder="big")
 
@@ -82,15 +82,18 @@ def encode(a_k: int, c: int, p: int, g: int, y: int, encrypted_msg: bytes,
     return encoded_header + encrypted_msg
 
 
-def decode(encoded_msg: bytes) -> (int, int, int, bytes, int):
+def decode(encoded_msg: bytes) -> (int, int, int, bytes):
     """Returns (a_k, c, p, g, y)"""
     private, encrypted_msg = der_decoder(encoded_msg, asn1Spec=_Header())
 
-    y = private["keys"]["first_key"]["public_key"]["y"]
-    p = private["keys"]["first_key"]["parameters"]["prime"]
-    g = private["keys"]["first_key"]["parameters"]["generator"]
-    a_k = private["keys"]["first_key"]["ciphertext"]["a_k"]
-    c = private["keys"]["first_key"]["ciphertext"]["c"]
+    a_x = int(private["keys"]["first_key"]["public_key"]["a_x"])
+    p = int(private["keys"]["first_key"]["parameters"]["prime"])
+    g = int(private["keys"]["first_key"]["parameters"]["generator"])
+    a_y = int(private["keys"]["first_key"]["ciphertext"]["a_y"])
+    c = int(private["keys"]["first_key"]["ciphertext"]["c"])
 
     msg_len = int(private["payload"]["file_len"])
-    return a_k, c, p, g, y, encrypted_msg, msg_len
+    if msg_len != len(encrypted_msg):
+        encrypted_msg = None
+
+    return a_y, c, p, g, a_x, encrypted_msg
