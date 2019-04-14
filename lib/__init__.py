@@ -5,9 +5,27 @@ import socket
 
 from .asn1 import ElGamalStruct
 from .elgamal import ElGamal
+from .rsa import RSACrypto
 
 del asn1
 del elgamal
+del rsa
+
+
+def bitcount(x):
+    return bin(x).count('1') + bin(x).count('0') - 1
+
+
+def get_primes(up_to: int = 200000):
+    """ Sieve of Eratosthenes """
+    primes = [2, 3, 5, 7]
+    all_num = [True] * (up_to + 1)
+    for p in range(9, up_to + 1, 2):
+        if all_num[p]:
+            primes.append(p)
+            for i in range(p, up_to + 1, p):
+                all_num[i] = False
+    return primes
 
 
 def add_padding(value: bytes, pad_size: int = 8):
