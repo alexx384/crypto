@@ -9,8 +9,8 @@ Need to do:
 - [X] 2. Implement ASN.1 format for ElGamal
 - [X] 3. Create a simple client server (Test Hello World)
 - [X] 4. Connect all
-- [ ] 5. Pack released modules (Health Testing)
-- [ ] 6. Get rid of duplicate code
+- [X] 5. Pack released modules (Health Testing)
+- [X] 6. Get rid of duplicate code
 - [ ] 7. Add comment/description to every public function and module
 
 The following modules will be implemented:

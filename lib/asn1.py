@@ -51,7 +51,7 @@ class _Keys(univ.Set):
     )
 
 
-class _Header(univ.Sequence):
+class ElGamalStruct(univ.Sequence):
     componentType = namedtype.NamedTypes(
         namedtype.NamedType('keys', _Keys()),
         namedtype.NamedType('payload', _Payload()),
