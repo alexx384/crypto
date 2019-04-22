@@ -12,7 +12,7 @@ del elgamal
 del rsa
 
 
-def bitcount(x):
+def bitcount(x: int):
     return bin(x).count('1') + bin(x).count('0') - 1
 
 

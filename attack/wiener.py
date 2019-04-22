@@ -1,13 +1,11 @@
 from sympy.ntheory.continued_fraction import continued_fraction_periodic
-import os
-
 import sys
 
 sys.path.append('..')
 import lib
 
 
-def isqrt(n):
+def _isqrt(n):
     '''
     Calculates the integer square root
     for arbitrary large nonnegative integers
@@ -26,7 +24,7 @@ def isqrt(n):
         x = y
 
 
-def is_perfect_square(n):
+def _is_perfect_square(n):
     '''
     If n is a perfect square it returns sqrt(n),
 
@@ -41,7 +39,7 @@ def is_perfect_square(n):
     # Take advantage of Boolean short-circuit evaluation
     if (h != 2 and h != 3 and h != 5 and h != 6 and h != 7 and h != 8):
         # take square root if you must
-        t = isqrt(n)
+        t = _isqrt(n)
         if t * t == n:
             return t
         else:
@@ -51,16 +49,11 @@ def is_perfect_square(n):
 
 
 def viner_attack(e, n):
-    tmp_n = n
-    counter = 1
-    while tmp_n > 255:
-        tmp_n >>= 8
-    test_msg = int.from_bytes(os.urandom(counter), byteorder='big')
-
+    # Find period of fraction
     drob = continued_fraction_periodic(e, n)
-    P = []
-    Q = []
 
+    # Find all convergent fraction k_1/d_1, k_i/d_i, k_n/d_n
+    # Calculation based on Euler recurrent formulas
     convergents = []
     convergents.append((drob[0], 1))
     convergents.append((drob[0] * drob[1] + 1, drob[1]))
@@ -76,14 +69,25 @@ def viner_attack(e, n):
 
     for (k, d) in convergents:
         # check if d is actually the key
+        # We are try to calculate: f_i = (e*d_i - 1) / k_i
+        # 1. So k_i != 0
+        # 2. We don't want irrational f_i, so check (e * d - 1) % k == 0
         if k != 0 and (e * d - 1) % k == 0:
-            phi = (e * d - 1) // k
-            s = n - phi + 1
+            f = (e * d - 1) // k
+
+            # Original equation: x^2 - ((N - f) + 1)*x + N = 0
+            # So we are replace s = ((N - f) + 1)
+            s = n - f + 1
+
             # check if the equation x^2 - s*x + n = 0
             # has integer roots
             discr = s * s - 4 * n
+
+            # Discriminant exist
             if (discr >= 0):
-                t = is_perfect_square(discr)
+
+                # Find t = sqrt(discr)
+                t = _is_perfect_square(discr)
                 if t != -1 and (s + t) % 2 == 0:
                     return int(d)
 
@@ -92,15 +96,17 @@ def main():
     e = 0x64e8cf64953d37e8ab29671150555e40b224f0c24fa7b741adfbcb611ea999c83eef6803fc78404f6389fe9c48e7c88163a5e0f3abbf45312e209e70d7e84f869e008a52132726dc319ea3f1be3879632b24180cc41d95430ee6e383c7ffa16a02a22172169ddd89e931b1544d5446b3befd43a85ffff1822b131c726f2a6c9b
     n = 0x46286d0a3dc5c6a51f8ee62b510f407104097d6e316d53c92b2a3973410dbcafe9e543ca2b05dc05cbbed069669c80d0f93ddd6be179f0a09caff75a8db8b9dc7e71ed6d1a32e174add0bb4093256e3c96d705107f39329e8a8fc614846edcfa4e2779f8e025470447c4b5d0cb4cbe578a1e4d56f2bccacba30048f890513d9d1
 
+    print("n =", n)
+    print("e =", e)
+
     d = viner_attack(e, n)
-    print(d)
 
     msg = int.from_bytes(b"Hello!!!", byteorder='big')
 
     crypted = pow(msg, e, n)
-    decr = pow(msg, d, n)
+    decr = pow(crypted, d, n)
     if decr == msg:
-        print('Found d == ' + str(d))
+        print('Found d = ' + str(d))
 
 
 main()
