@@ -59,7 +59,7 @@ class RSACrypto(object):
         self.q = q
         self.n = n
         self.e = e
-        self.d = d
+        self.d = int(d)
 
         return e, d, n
 
