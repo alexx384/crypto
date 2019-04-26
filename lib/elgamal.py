@@ -2,7 +2,7 @@ import sympy
 import random
 from pyasn1.codec.der.encoder import encode as der_encoder
 from pyasn1.codec.der.decoder import decode as der_decoder
-from . import ElGamalStruct
+from . import asn1struct
 
 
 class ElGamal(object):
@@ -45,7 +45,7 @@ class ElGamal(object):
 
     def encode(self, bobs_shared_key: int, encr_sym_key: int, encr_data: bytes) \
             -> bytes:
-        struct = ElGamalStruct()
+        struct = asn1struct.ElGamalStruct()
 
         # Create structure and pack it
         struct["keys"]["first_key"]["algorithm_id"] = b"\x80\x01\x02\x03"
@@ -62,7 +62,7 @@ class ElGamal(object):
         return encoded_header + encr_data
 
     def decode(self, encoded_msg: bytes, checks: bool = True) -> (int, int, bytes):
-        struct, encr_data = der_decoder(encoded_msg, asn1Spec=ElGamalStruct())
+        struct, encr_data = der_decoder(encoded_msg, asn1Spec=asn1struct.ElGamalStruct())
 
         bobs_shared_key = int(struct["keys"]["first_key"]["public_key"]["a_x"])
         p = int(struct["keys"]["first_key"]["parameters"]["prime"])

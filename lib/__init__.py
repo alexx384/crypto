@@ -3,11 +3,11 @@ from cryptography.hazmat.backends import default_backend
 import os
 import socket
 
-from .asn1 import ElGamalStruct
+# from .asn1struct import ElGamalStruct
 from .elgamal import ElGamal
 from .rsa import RSACrypto
 
-del asn1
+# del asn1struct
 del elgamal
 del rsa
 
