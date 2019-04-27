@@ -74,30 +74,3 @@ class RSACrypto(object):
 
     def decrypt(self, value: int) -> int:
         return pow(value, self.d, self.n)
-
-    @staticmethod
-    def __egcd(a, b):
-        if a == 0:
-            return b, 0, 1
-        else:
-            g, x, y = RSACrypto.__egcd(b % a, a)
-            return g, y - (b // a) * x, x
-
-    @staticmethod
-    def _evklid(r0: int, r1: int) -> (int, int):
-        reverse = False
-
-        if r0 < r1:
-            r0, r1 = r1, r0
-            reverse = True
-
-        r1, a1, b1 = RSACrypto.__egcd(r0, r1)
-
-        if r1 == 0:
-            """ Not prime """
-            return None
-        else:
-            if not reverse:
-                return a1, b1
-            else:
-                return b1, a1

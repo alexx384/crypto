@@ -3,13 +3,13 @@ from cryptography.hazmat.backends import default_backend
 import os
 import socket
 
-# from .asn1struct import ElGamalStruct
 from .elgamal import ElGamal
 from .rsa import RSACrypto
+from .gost3410 import Gost3410
 
-# del asn1struct
 del elgamal
 del rsa
+del gost3410
 
 
 def bitcount(x: int):

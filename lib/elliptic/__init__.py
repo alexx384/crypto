@@ -35,14 +35,14 @@ def sum_points(point1, point2, a_factor, p_field):
 
     if point1[0] == point2[0] and point1[1] == point2[1]:
         l1 = (3 * x1 ** 2 + a_factor)
-        s = int(sympy.invert(2 * y1, p_field))
+        s = int(sympy.mod_inverse(2 * y1, p_field))
         l_factor = (l1 * s) % p_field
         x3 = (l_factor ** 2 - 2 * x1) % p_field
         y3 = (l_factor * (x1 - x3) - y1) % p_field
         point3 = [x3, y3]
         return point3, 2 * y1
     else:
-        s = int(sympy.invert(x2 - x1, p_field))
+        s = int(sympy.mod_inverse(x2 - x1, p_field))
         l_factor = ((y2 - y1) * s) % p_field
         x3 = (l_factor ** 2 - x1 - x2) % p_field
         y3 = (l_factor * (x1 - x3) - y1) % p_field
