@@ -6,6 +6,8 @@ import socket
 from .elgamal import ElGamal
 from .rsa import RSACrypto
 from .gost3410 import Gost3410
+from .gelfond import gelfond
+from .pollard import pollard
 
 del elgamal
 del rsa
